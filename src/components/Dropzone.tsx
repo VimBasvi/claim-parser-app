@@ -17,6 +17,7 @@ export default function Dropzone({ onFiles }: DropzoneProps) {
 			'application/pdf': [],
 			'application/vnd.openxmlformats-officedocument.wordprocessingml.document': [],
 			'application/msword': [],
+			'text/plain': [],
 		},
 		// funct called when files are dropped
 		onDrop: (acceptedFiles) => {
