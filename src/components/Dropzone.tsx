@@ -37,7 +37,7 @@ export default function Dropzone({ onFiles }: DropzoneProps) {
 
 		{/* Instructional text for the user */}
 		<p className="text-gray-600">
-		Drag & drop .pdf, .docx, or .txt files here, or click to browse
+		Drag & drop .pdf, .docx, or .txt files here.
 		</p>
 		</div> 
 	
