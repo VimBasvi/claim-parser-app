@@ -13,25 +13,34 @@ export async function extractInsuredNameFromText(text: string): Promise<string> 
     const contents = [
       {
         role: 'user',
-        parts: [
-          {
-            text: `
-You are reading an insurance document. Extract ONLY the full name of the **primary insured entity** from the text below.
-
-TEXT:
-${text}
-
-Return only the name as plain text. No explanations, no formatting.
-`.trim(),
-          },
-        ],
+        parts: [{ text: `You are reading insurance documents. Extract ONLY the full name of the primary insured entity from each input. Return ONLY the name as plain text. No explanations, no formatting.` }]
       },
+      {
+        role: 'user',
+        parts: [{ text: `TEXT:\nThis claim involves Starlight Entertainment Corp.\n\nAnswer:` }]
+      },
+      {
+        role: 'model',
+        parts: [{ text: `Starlight Entertainment Corp` }]
+      },
+      {
+        role: 'user',
+        parts: [{ text: `TEXT:\nPayment processed for Golden Gate Ventures LLC.\n\nAnswer:` }]
+      },
+      {
+        role: 'model',
+        parts: [{ text: `Golden Gate Ventures LLC` }]
+      },
+      {
+        role: 'user',
+        parts: [{ text: `TEXT:\n${text}\n\nAnswer:` }]
+      }
     ];
 
-    // all generateContent on the model instance and pass the contents array directly or as part of a GenerateContentRequest object
+    // call generateContent on the model instance and pass the contents array directly or as part of a GenerateContentRequest object
     const result = await model.generateContent({ contents });
     
-    // It's good practice to access the response through response.text()  because ... if available for simple text
+    //   access the response through response.text()  because ... if available for simple text
     const response = result.response; // Get the full response
     const firstCandidate = response.candidates?.[0];
     const part = firstCandidate?.content?.parts?.[0];

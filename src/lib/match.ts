@@ -5,6 +5,8 @@ const CORPORATE_SUFFIXES = [
   'llc', 'inc', 'corp', 'ltd', 'co', 'group', 'partners', 'services', 'holdings', 'solutions', 'plc'
 ];
 
+
+// normalize the name by removing punctuation, converting to lowercase, and removing corporate suffixes
 function normalizeName(name: string): string {
   return name
     .toLowerCase()
@@ -36,6 +38,7 @@ export function matchInsuredName(extracted: string):
   } = { internalId: null, name: null, confidence: 0, distance: Infinity, allowPick: false };
 
 
+  // Iterate through the list of insured names and find the best match with the highest confidence and lowest distance
   for (const insured of INSUREDS) {
     const insuredNorm = normalizeName(insured.name);
     const maxLen = Math.max(extractedNorm.length, insuredNorm.length);

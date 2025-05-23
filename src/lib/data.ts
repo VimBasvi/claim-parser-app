@@ -1,3 +1,4 @@
+// lib/data.ts
 export const INSUREDS = [
 	{ internalId: "A1B2", name: "Riley HealthCare LLC" },
 	{ internalId: "C3D4", name: "Quail Creek RE LLC" },

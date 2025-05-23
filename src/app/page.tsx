@@ -16,6 +16,7 @@ type UploadFile = {
   distance?: number;
   allowPick?: boolean;
   internalId?: string | null;
+  error?: string;
 };
 
 export default function Page(){
@@ -32,6 +33,7 @@ export default function Page(){
                 matchedName: insured.name,
                 distance: 0,
                 allowPick: false,
+                internalId: insured.internalId,
               }
             : f
         )
@@ -93,17 +95,19 @@ export default function Page(){
         );
 
 
-      } catch (error)  {
+      } catch (error: any) {
         // If there is an error, update the status to error
-        console.error('Error parsing file:', file.name, error); // log the error
+        console.error('Error parsing file:', file.name, error);
         setFiles(prev =>
           prev.map(f =>
             f.file.name === file.name
-              ? { ...f, status: 'error' }
+              ? { ...f, status: 'error', error: error.message || 'An unexpected error occurred'
+ }
               : f
           )
         );
       }
+
 
     }
   }
@@ -149,6 +153,11 @@ export default function Page(){
                   </div>
                 )}
               </>
+            )}
+            {f.status === 'error' && (
+              <p className="text-red-500">
+                <strong>Error:</strong> {f.error}
+              </p>
             )}
 
             </li>

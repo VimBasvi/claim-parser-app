@@ -100,4 +100,9 @@ npm run dev
 * **LLM errors** (like token limits or service unavailable) must be caught and surfaced gracefully in the UI to prevent crashes
 * **Use `console.error`** for debugging but provide fallback UI for user-friendly feedback
 
+---
+## Run Tests
+
+```bash
+npx jest src/lib/match.test.ts
 
