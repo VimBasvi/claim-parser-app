@@ -1,7 +1,7 @@
 'use client'; // next/js treats this as a client component since it uses hooks and browser api's?
 import Dropzone from '@/components/Dropzone'; // import the Dropzone component
 import { useState } from 'react'; // import the useState hook from react
-import { parseTextFile } from '@/lib/parser';
+import { parsePdfFile, parseTextFile } from '@/lib/parser';
 
 type UploadFile = {
   file: File;
@@ -23,6 +23,9 @@ export default function Page(){
         if (file.type === 'text/plain') {
           text = await parseTextFile(file); // parse the file if it is a text file
         } 
+        else if (file.type === 'application/pdf') {
+          text = await parsePdfFile(file);
+        }
 
         // Update status to done and we attch the text to the file object
         setFiles(prev =>

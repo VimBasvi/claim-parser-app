@@ -10,4 +10,14 @@ https://www.geeksforgeeks.org/how-to-load-data-from-a-file-in-next-js/
 https://react-dropzone.js.org/
 
 
-Journey 
+Journey
+
+Started with Dropzone Component
+Checked if it worked in page.tsx 
+Parsed .txt file - had hard time with drag and drop - realized I had forgotten to include it in accepted files for the dropzone after an hr or so when upload wasn't working 
+
+
+Installs:
+
+npm install pdfjs-dist
+npm install pdfjs-dist@3.11.174
