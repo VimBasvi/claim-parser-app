@@ -1,4 +1,4 @@
-
+const mammoth = require('mammoth'); //sidestep the typing problem by using require instead of import
 
 // starting with a .txt file parser
 export async function parseTextFile(file: File): Promise<string> {
@@ -53,5 +53,12 @@ export async function parsePdfFile(file: File): Promise<string> {
 
 	//return the full text so we can store or display it elsewhere
 	return fullText;
+}
+
+export async function parseDocxFile(file:File): Promise<string> {
+	const arrayBuffer = await file.arrayBuffer(); // convert the file to an array buffer
+	const {value} = await mammoth.convertToHtml({arrayBuffer}); // use mammoth to convert the array buffer to plain text
+	console.log (value);
+	return value.replace(/<[^>]*>/g, ''); // return the plain text no html tags
 }
 
