@@ -1,12 +1,15 @@
+// page.tsx
 'use client'; // next/js treats this as a client component since it uses hooks and browser api's?
 import Dropzone from '@/components/Dropzone'; // import the Dropzone component
 import { useState } from 'react'; // import the useState hook from react
 import { parsePdfFile, parseTextFile, parseDocxFile } from '@/lib/parser';
+import { extractInsuredNameFromText } from '@/lib/llm'; // import the function to extract the insured name from the text
 
 type UploadFile = {
   file: File;
   status: 'uploaded' | 'processing' | 'done' | 'error';
   text?: string;
+  insuredName?: string; // optional property to hold the insured name
 };
 
 export default function Page(){
@@ -19,7 +22,7 @@ export default function Page(){
       setFiles((prevFiles) => [...prevFiles, {file, status: 'processing'}]); // update the state with the new files
 
       try {
-        let text;
+        let text ;
         if (file.type === 'text/plain') {
           text = await parseTextFile(file); // parse the file if it is a text file
         } 
@@ -29,6 +32,16 @@ export default function Page(){
         else if (file.type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document') {
           text = await parseDocxFile(file);
         }
+
+        const res = await fetch('/api', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ text }),
+        });
+        const data = await res.json();
+        const insuredName = data.name;
+        
+        console.log('LLM Insured Name:', insuredName);
         
 
 
@@ -36,7 +49,7 @@ export default function Page(){
         setFiles(prev =>
           prev.map(f =>
             f.file.name === file.name
-              ? { ...f, status: 'done', text }
+              ? { ...f, status: 'done', insuredName }
               : f
           )
         );
