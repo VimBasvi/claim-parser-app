@@ -9,19 +9,32 @@ function normalizeName(name: string): string {
   return name
     .toLowerCase()
     .replace(/[.,]/g, '') // remove punctuation
-    .split(' ')
+    .split(' ') // split into words
     .filter(word => !CORPORATE_SUFFIXES.includes(word))
     .join(' ')
     .trim();
 }
 
-export function matchInsuredName(extracted: string): {
+export function matchInsuredName(extracted: string): 
+({
   internalId: string | null;
+  name: string | null;
   confidence: number;
-} {
+  distance: number;
+  allowPick?: boolean;
+})
+
+ {
   const extractedNorm = normalizeName(extracted);
 
-  let bestMatch = { internalId: null, confidence: 0 };
+  let bestMatch: {
+    internalId: string | null;
+    name: string | null;
+    confidence: number;
+    distance: number;
+    allowPick?: boolean;
+  } = { internalId: null, name: null, confidence: 0, distance: Infinity, allowPick: false };
+
 
   for (const insured of INSUREDS) {
     const insuredNorm = normalizeName(insured.name);
@@ -30,13 +43,19 @@ export function matchInsuredName(extracted: string): {
     const similarity = 1 - dist / maxLen;
 
     if (similarity > bestMatch.confidence) {
-      bestMatch = { internalId: insured.internalId, confidence: similarity };
+      bestMatch = { internalId: insured.internalId, name: insured.name, confidence: similarity, distance: dist, allowPick:false };
     }
   }
 
   // If confidence < 0.8, consider it no match
   if (bestMatch.confidence < 0.8) {
-    return { internalId: null, confidence: bestMatch.confidence };
+    return {
+      internalId: null,
+      name: null,
+      confidence: bestMatch.confidence,
+      distance: bestMatch.distance,
+      allowPick: true,
+    };
   }
 
   return bestMatch;

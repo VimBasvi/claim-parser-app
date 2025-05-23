@@ -4,15 +4,40 @@ import Dropzone from '@/components/Dropzone'; // import the Dropzone component
 import { useState } from 'react'; // import the useState hook from react
 import { parsePdfFile, parseTextFile, parseDocxFile } from '@/lib/parser';
 import { extractInsuredNameFromText } from '@/lib/llm'; // import the function to extract the insured name from the text
+import { matchInsuredName } from '@/lib/match';
+import { INSUREDS } from '@/lib/data'; // import the list of insured names
 
 type UploadFile = {
   file: File;
   status: 'uploaded' | 'processing' | 'done' | 'error';
   text?: string;
   insuredName?: string; // optional property to hold the insured name
+  matchedName?: string;
+  distance?: number;
+  allowPick?: boolean;
+  internalId?: string | null;
 };
 
 export default function Page(){
+
+  const handleManualPick = (fileIndex: number, name: string) => {
+      const insured = INSUREDS.find(i => i.name === name);
+      if (!insured) return;
+
+      setFiles(prev =>
+        prev.map((f, i) =>
+          i === fileIndex
+            ? {
+                ...f,
+                matchedName: insured.name,
+                distance: 0,
+                allowPick: false,
+              }
+            : f
+        )
+      );
+    };
+
   
   const [files, setFiles] = useState<UploadFile[]>([]); // state to hold the files dropped in the dropzone
 
@@ -42,17 +67,31 @@ export default function Page(){
         const insuredName = data.name;
         
         console.log('LLM Insured Name:', insuredName);
-        
+        const matchResult = matchInsuredName(insuredName);
+        const matchedName = matchResult?.name ?? 'No match found';
+        const distance = matchResult?.distance ?? 0;
+        const allowPick = matchResult?.allowPick ?? false;
+        const internalId = matchResult?.internalId ?? null;
+
 
 
         // Update status to done and we attch the text to the file object
         setFiles(prev =>
           prev.map(f =>
             f.file.name === file.name
-              ? { ...f, status: 'done', insuredName }
+              ? {
+                  ...f,
+                  status: 'done',
+                  insuredName,
+                  matchedName,
+                  distance,
+                  allowPick,
+                  internalId,
+                }
               : f
           )
         );
+
 
       } catch (error)  {
         // If there is an error, update the status to error
@@ -80,14 +119,42 @@ export default function Page(){
       {/* Display the files dropped in the dropzone */}
       <div className="mt-6">
         <h2 className="text-xl font-semibold mb-2">Files Uploaded:</h2>
-        <ul className="list-disc list-inside">
-          {/* loop thru file arr and display each file name */}
+        <ul className="space-y-4">
           {files.map((f, index) => (
-            <li key={index}>
-              {f.file.name} – <span className="italic">{f.status}</span>
-            </li> //for each file, display the file name
+            <li key={index} className="border p-4 rounded shadow-sm bg-white">
+              <p><strong>File:</strong> {f.file.name}</p>
+              <p><strong>Status:</strong> <span className="italic">{f.status}</span></p>
+              {f.status === 'done' && (
+              <>
+                <p><strong>Extracted Name:</strong> {f.insuredName}</p>
+                <p><strong>Matched Name:</strong> {f.matchedName}</p>
+                <p><strong>Levenshtein Distance:</strong> {f.distance}</p>
+                <p><strong> Internal ID:</strong> {f.internalId}</p>
+
+                {f.allowPick && (
+                  <div className="mt-2">
+                    <label className="block mb-1 font-medium">No confident match found. Select manually:</label>
+                    <select
+                      className="border rounded px-2 py-1"
+                      onChange={(e) => handleManualPick(index, e.target.value)}
+                      value={f.matchedName ?? ''}
+                    >
+                      <option value="">Select a name</option>
+                      {INSUREDS.map((i) => (
+                        <option key={i.internalId} value={i.name}>
+                          {i.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                )}
+              </>
+            )}
+
+            </li>
           ))}
         </ul>
+
         </div>
     </main>
     );
